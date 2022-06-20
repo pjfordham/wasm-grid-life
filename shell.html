@@ -79,16 +79,17 @@
               const element = document.getElementById("canvas")
 
               function idraw() {
-                  element.innerHTML = "";
-                  element.style.display = "inline-grid";
+                  element.style.display = "grid";
                   element.style.gridTemplate = `repeat(${life.getWidth()}, auto) / repeat(${life.getHeight()}, auto)`;
+                  element.style.alignContent = "center";
+                  element.style.justifyContent = "center";
                   for (let i = 0; i < life.getWidth(); i++) {
                       for (let j = 0; j < life.getHeight(); j++) {
-                          let xelement = document.createElement("a");
-                          xelement.id = `grid${i}_${j}`;
-                          xelement.classList.add("field");
-                          xelement.href = "#";
-                          xelement.innerText = life.getContent(i,j) == 100 ? "🟩" : "⬜";
+                          let xelement = document.createElement("canvas");
+                          xelement.width = 10;
+                          // xelement.style.border = "1px solid black";
+                          xelement.height = 10;
+                          xelement.style.backgroundColor = "black";
                           xelement.addEventListener("click", (evt) => {
                               evt.preventDefault();
                               life.click(j, i);
@@ -99,29 +100,53 @@
                   }
               }
 
+
+              var running = false;
+
+              idraw();
+              var children = element.childNodes;
+
               function draw() {
-                  var children = element.childNodes;
                   var i = 0;
                   var j = 0;
-                  for (let x of children.values()) {
-                      x.innerText = life.getContent(i,j++) == 100 ? "🟩" : "⬜";
-                      if (j == 10 ) {j=0; i++}
+                  for (let x of children) {
+                      var g = life.getContent(i,j++);
+                      if (g == 100) {
+                          x.style.backgroundColor = "rgb(0,255,0)";
+                      } else if (g == 0) {
+                          x.style.backgroundColor = "black";
+                      } else {
+                          x.style.backgroundColor = `rgb(0,${g},0)`;
+                      }
+                      if (j == life.getWidth() ) {j=0; i++}
                   }
               }
 
+
               window.onkeypress = (event) => {
-                  life.iterate(1);
-                  draw();
-                  //Module.ccall('keypress','',['number'],[event.key.charCodeAt(0)]);
-                  //ctx.putImageData(image, 0, 0);
+                  var key = event.key;
+                  if( key == " " ) {
+                      running = !running;
+                  } else if ( key == "i" ) {
+                      life.iterate(1);
+                      running = false;
+                      draw();
+                  } else if ( key == "c" ) {
+                      life.clear();
+                      running = false;
+                      draw();
+                  }
               };
 
-              //const interval = setInterval(function() {
-              //    life.iterate(1);
-              //    draw();
-              //}, 10);
-
-              idraw();
+              function step(timestamp) {
+                  // do something for every frame
+                  if (running ) {
+                      life.iterate(13);
+                      draw();
+                  }
+                  window.requestAnimationFrame(step);
+              }
+              window.requestAnimationFrame(step);
 
           }],
         preRun: [],

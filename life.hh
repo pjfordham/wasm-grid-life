@@ -3,7 +3,7 @@
 
 #include "support.hh"
 
-const int BOARD_SIZE = 10;
+const int BOARD_SIZE = 75;
 const int HEIGHT=BOARD_SIZE;
 const int WIDTH=BOARD_SIZE;
 
