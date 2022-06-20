@@ -101,5 +101,7 @@ EMSCRIPTEN_BINDINGS(my_class_example) {
       .function("update", &GameOfLife::update)
       .function("getContent", &GameOfLife::getContent)
       .function("getState", &GameOfLife::getState)
+      .function("getHeight", &GameOfLife::getHeight)
+      .function("getWidth", &GameOfLife::getWidth)
       ;
 }

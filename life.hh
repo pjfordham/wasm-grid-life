@@ -43,6 +43,9 @@ public:
    void addShape( Shape shape, int x = -1 , int y = -1);
    void click( int i, int j );
 
+   int getHeight() { return HEIGHT; }
+   int getWidth() { return WIDTH; }
+
    void print();
    void update();
    void clear();

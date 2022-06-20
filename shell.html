@@ -75,48 +75,32 @@
 
       var Module = {
           postRun: [function() {
-              Module._init();
+              var life = new Module.GameOfLife();
               const element = document.getElementById("canvas")
               const ctx = element.getContext("2d")
               const canvas = ctx.canvas;
-              element.width = Module.ccall('getWidth', // name of C function
-                                           'number', // return type
-                                           [], // argument types
-                                           [] );
-              element.height = Module.ccall('getHeight', // name of C function
-                                           'number', // return type
-                                           [], // argument types
-                                           [] );
-              array = new Uint8ClampedArray(
-                      Module.HEAPU8.buffer,
-                      Module.ccall('get_buffer_address','number',[],[]),
-                      4 * element.width * element.height,
-              );
-              const image = new ImageData(
-                  array,
-                  element.width,
-              );
+              element.width = life.getWidth() * 10;
+              element.height = life.getHeight() * 10;
 
+              
               element.onmousedown = (event) => {
                   var x = event.clientX - canvas.offsetLeft
                   var y = event.clientY - canvas.offsetTop
                   if (event.button == 0) {
-                      Module.ccall('click','',['number','number'],[x,y]);
-                      ctx.putImageData(image, 0, 0);
+                      life.click( x, y );
                   } else if (event.button == 2) {
-                      Module.ccall('rightclick','',['number','number'],[x,y]);
-                       ctx.putImageData(image, 0, 0);
                   }
               };
               window.onkeypress = (event) => {
-                  Module.ccall('keypress','',['number'],[event.key.charCodeAt(0)]);
-                  ctx.putImageData(image, 0, 0);
+                  life.iterate(1);
+                  //Module.ccall('keypress','',['number'],[event.key.charCodeAt(0)]);
+                  //ctx.putImageData(image, 0, 0);
               };
 
-              const interval = setInterval(function() {
-                  Module._pulse();//ccall('pulse','',[],[]);
-                  ctx.putImageData(image, 0, 0);
-              }, 10);
+              //const interval = setInterval(function() {
+              //    Module._pulse();//ccall('pulse','',[],[]);
+              //    ctx.putImageData(image, 0, 0);
+              //}, 10);
 
           }],
         preRun: [],
