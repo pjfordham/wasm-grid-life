@@ -54,7 +54,7 @@
       <progress value="0" max="100" id="progress" hidden=1></progress>  
     </div>
     <div class="emscripten_border">
-      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+      <div class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
     </div>
     <hr/>
     <div class="emscripten">
@@ -77,22 +77,33 @@
           postRun: [function() {
               var life = new Module.GameOfLife();
               const element = document.getElementById("canvas")
-              const ctx = element.getContext("2d")
-              const canvas = ctx.canvas;
+
               element.width = life.getWidth() * 10;
               element.height = life.getHeight() * 10;
 
-              
-              element.onmousedown = (event) => {
-                  var x = event.clientX - canvas.offsetLeft
-                  var y = event.clientY - canvas.offsetTop
-                  if (event.button == 0) {
-                      life.click( x, y );
-                  } else if (event.button == 2) {
+              function draw() {
+                  element.innerHTML = "";
+                  element.style.display = "inline-grid";
+                  element.style.gridTemplate = `repeat(${life.getWidth()}, auto) / repeat(${life.getHeight()}, auto)`;
+                  for (let i = 0; i < life.getWidth(); i++) {
+                      for (let j = 0; j < life.getHeight(); j++) {
+                          let xelement = document.createElement("a");
+                          xelement.classList.add("field");
+                          xelement.href = "#";
+                          xelement.innerText = life.getContent(i,j) == 100 ? "X" : "O";
+                          xelement.addEventListener("click", (evt) => {
+                              evt.preventDefault();
+                              life.click(j, i);
+                              draw();
+                          });
+                          element.appendChild(xelement);
+                        }
                   }
-              };
+              }
+              
               window.onkeypress = (event) => {
                   life.iterate(1);
+                  draw();
                   //Module.ccall('keypress','',['number'],[event.key.charCodeAt(0)]);
                   //ctx.putImageData(image, 0, 0);
               };
@@ -101,7 +112,8 @@
               //    Module._pulse();//ccall('pulse','',[],[]);
               //    ctx.putImageData(image, 0, 0);
               //}, 10);
-
+              draw();
+              
           }],
         preRun: [],
         print: (function() {
