@@ -51,7 +51,7 @@
     <figure style="overflow:visible;" id="spinner"><div class="spinner"></div><center style="margin-top:0.5em"><strong>emscripten</strong></center></figure>
     <div class="emscripten" id="status">Downloading...</div>
     <div class="emscripten">
-      <progress value="0" max="100" id="progress" hidden=1></progress>  
+      <progress value="0" max="100" id="progress" hidden=1></progress>
     </div>
     <div class="emscripten_border">
       <div class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
@@ -61,10 +61,10 @@
       <input type="checkbox" id="resize">Resize canvas
       <input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer
       &nbsp;&nbsp;&nbsp;
-      <input type="button" value="Fullscreen" onclick="Module.requestFullscreen(document.getElementById('pointerLock').checked, 
+      <input type="button" value="Fullscreen" onclick="Module.requestFullscreen(document.getElementById('pointerLock').checked,
                                                                                 document.getElementById('resize').checked)">
     </div>
-    
+
     <hr/>
     <textarea class="emscripten" id="output" rows="8"></textarea>
     <hr>
@@ -78,19 +78,17 @@
               var life = new Module.GameOfLife();
               const element = document.getElementById("canvas")
 
-              element.width = life.getWidth() * 10;
-              element.height = life.getHeight() * 10;
-
-              function draw() {
+              function idraw() {
                   element.innerHTML = "";
                   element.style.display = "inline-grid";
                   element.style.gridTemplate = `repeat(${life.getWidth()}, auto) / repeat(${life.getHeight()}, auto)`;
                   for (let i = 0; i < life.getWidth(); i++) {
                       for (let j = 0; j < life.getHeight(); j++) {
                           let xelement = document.createElement("a");
+                          xelement.id = `grid${i}_${j}`;
                           xelement.classList.add("field");
                           xelement.href = "#";
-                          xelement.innerText = life.getContent(i,j) == 100 ? "X" : "O";
+                          xelement.innerText = life.getContent(i,j) == 100 ? "🟩" : "⬜";
                           xelement.addEventListener("click", (evt) => {
                               evt.preventDefault();
                               life.click(j, i);
@@ -100,7 +98,17 @@
                         }
                   }
               }
-              
+
+              function draw() {
+                  var children = element.childNodes;
+                  var i = 0;
+                  var j = 0;
+                  for (let x of children.values()) {
+                      x.innerText = life.getContent(i,j++) == 100 ? "🟩" : "⬜";
+                      if (j == 10 ) {j=0; i++}
+                  }
+              }
+
               window.onkeypress = (event) => {
                   life.iterate(1);
                   draw();
@@ -109,11 +117,12 @@
               };
 
               //const interval = setInterval(function() {
-              //    Module._pulse();//ccall('pulse','',[],[]);
-              //    ctx.putImageData(image, 0, 0);
+              //    life.iterate(1);
+              //    draw();
               //}, 10);
-              draw();
-              
+
+              idraw();
+
           }],
         preRun: [],
         print: (function() {
