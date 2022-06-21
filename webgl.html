@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
    <body>
-      <canvas width = "800" height = "600" id = "canvas"></canvas>
+      <canvas width = "1000" height = "1000" id = "canvas"></canvas>
 
       <script>
          /* Step1: Prepare the canvas and get WebGL context */
@@ -141,6 +141,19 @@
          gl.enableVertexAttribArray(color);
 
 
+   function rotateZ(m, angle) {
+            var c = Math.cos(angle);
+            var s = Math.sin(angle);
+            var mv0 = m[0], mv4 = m[4], mv8 = m[8]; 
+
+            m[0] = c*m[0]-s*m[1];
+            m[4] = c*m[4]-s*m[5];
+            m[8] = c*m[8]-s*m[9];
+            m[1] = c*m[1]+s*mv0;
+            m[5] = c*m[5]+s*mv4;
+            m[9] = c*m[9]+s*mv8;
+   }
+
         // Transformation matrix
         var Sx = 1.5, Sy = 1.0, Sz = 1.0;
          var xformMatrix = new Float32Array([
@@ -152,25 +165,31 @@
 
         // Push down to shader
         var u_xformMatrix = gl.getUniformLocation(shaderProgram, 'u_xformMatrix');
-        gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
 
         /* Step5: Drawing the required object (triangle) */
 
-         // Clear the canvas
-         gl.clearColor(0.5, 0.5, 0.5, 0.9);
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+            gl.viewport(0.0, 0.0, canvas.width, canvas.height);
+            gl.clearColor(0.5, 0.5, 0.5, 0.9);
+            gl.clearDepth(1.0);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
 
-         // Enable the depth test
-         gl.enable(gl.DEPTH_TEST);
+        var time_old = 0;
+         var animate = function(time) {
+            var dt = time-time_old;
+            time_old = time;
 
-         // Clear the color buffer bit
-         gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-         // Set the view port
-         gl.viewport(0,0,canvas.width,canvas.height);
+            rotateZ(xformMatrix, dt*0.001);
+            gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
 
-        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT,0);
-        // Draw the triangle
-        // gl.drawArrays(gl.TRIANGLES, 0, 3);
+            gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+            window.requestAnimationFrame(animate);
+         }
+         animate(0);
+
       </script>
    </body>
 </html>
