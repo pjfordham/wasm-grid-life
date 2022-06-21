@@ -182,6 +182,39 @@
         // translating z
         view_matrix[14] = view_matrix[14]-6;//zoom
 
+        /*================= Mouse events ======================*/
+
+        var AMORTIZATION = 0.95;
+        var drag = false;
+        var old_x, old_y;
+        var dX = 0, dY = 0;
+
+        var mouseDown = function(e) {
+            drag = true;
+            old_x = e.pageX, old_y = e.pageY;
+            e.preventDefault();
+            return false;
+        };
+
+        var mouseUp = function(e){
+            drag = false;
+        };
+
+        var mouseMove = function(e) {
+            if (!drag) return false;
+            dX = (e.pageX-old_x)*2*Math.PI/canvas.width,
+            dY = (e.pageY-old_y)*2*Math.PI/canvas.height;
+            THETA+= dX;
+            PHI+=dY;
+            old_x = e.pageX, old_y = e.pageY;
+            e.preventDefault();
+        };
+
+        canvas.addEventListener("mousedown", mouseDown, false);
+        canvas.addEventListener("mouseup", mouseUp, false);
+        canvas.addEventListener("mouseout", mouseUp, false);
+        canvas.addEventListener("mousemove", mouseMove, false);
+
         function rotateZ(m, angle) {
             var c = Math.cos(angle);
             var s = Math.sin(angle);
@@ -230,26 +263,44 @@
 
         /* Step5: Drawing the required object (triangle) */
 
-
+        var THETA = 0;
+        var PHI = 0;
         var time_old = 0;
+
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthFunc(gl.LEQUAL);
+        gl.clearColor(0.5, 0.5, 0.5, 0.9);
+        gl.clearDepth(1.0);
+        gl.viewport(0.0, 0.0, canvas.width, canvas.height);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+
         var animate = function(time) {
             var dt = time-time_old;
-            rotateZ(mov_matrix, dt*0.005);//time
-            rotateY(mov_matrix, dt*0.002);
-            rotateX(mov_matrix, dt*0.003);
+            if (!drag) {
+                dX *= AMORTIZATION;
+                dY*=AMORTIZATION;
+                THETA+=dX;
+                PHI+=dY;
+            }
+
+            mov_matrix = [ 1, 0, 0, 0,
+                           0, 1, 0, 0,
+                           0, 0, 1, 0,
+                           0, 0, 0, 1 ];
+
+            rotateY(mov_matrix, THETA);
+            rotateX(mov_matrix, PHI);
+
+            // rotateZ(mov_matrix, dt*0.005);
+            // rotateY(mov_matrix, dt*0.002);
+            // rotateX(mov_matrix, dt*0.003);
+
             time_old = time;
 
-            gl.enable(gl.DEPTH_TEST);
-            gl.depthFunc(gl.LEQUAL);
-            gl.clearColor(0.5, 0.5, 0.5, 0.9);
-            gl.clearDepth(1.0);
-
-            gl.viewport(0.0, 0.0, canvas.width, canvas.height);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
             gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
             gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
             gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
             window.requestAnimationFrame(animate);
         }
