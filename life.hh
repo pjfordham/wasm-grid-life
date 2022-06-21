@@ -3,10 +3,6 @@
 
 #include "support.hh"
 
-const int BOARD_SIZE = 75;
-const int HEIGHT=BOARD_SIZE;
-const int WIDTH=BOARD_SIZE;
-
 struct Shape {
 public:
    const char * const* figure;
@@ -39,9 +35,9 @@ public:
    static const int LIVE = 100;
    static const int DEAD = 0;
 
-   GameOfLife();
+   GameOfLife(int HEIGHT, int WIDTH);
    void addShape( Shape shape, int x = -1 , int y = -1);
-   void click( int i, int j );
+   void click( int x, int y );
 
    int getHeight() { return HEIGHT; }
    int getWidth() { return WIDTH; }
@@ -49,10 +45,12 @@ public:
    void print();
    void update();
    void clear();
-   int getContent( int i, int j);
+   int getContent( int x, int y);
    int getState( int state , int x , int y );
    void iterate(unsigned int iterations);
 private:
+   int HEIGHT;
+   int WIDTH;
    Array2D<int> world;
    Array2D<int> otherWorld;
 };

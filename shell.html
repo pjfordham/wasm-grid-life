@@ -75,7 +75,7 @@
 
       var Module = {
           postRun: [function() {
-              var life = new Module.GameOfLife();
+              var life = new Module.GameOfLife(75,100);
               const element = document.getElementById("canvas")
 
               function idraw() {
@@ -83,8 +83,8 @@
                   element.style.gridTemplate = `repeat(${life.getWidth()}, auto) / repeat(${life.getHeight()}, auto)`;
                   element.style.alignContent = "center";
                   element.style.justifyContent = "center";
-                  for (let i = 0; i < life.getWidth(); i++) {
-                      for (let j = 0; j < life.getHeight(); j++) {
+                  for (let x = 0; x < life.getWidth(); x++) {
+                      for (let y = 0; y < life.getHeight(); y++) {
                           let xelement = document.createElement("canvas");
                           xelement.width = 10;
                           // xelement.style.border = "1px solid black";
@@ -92,7 +92,7 @@
                           xelement.style.backgroundColor = "black";
                           xelement.addEventListener("click", (evt) => {
                               evt.preventDefault();
-                              life.click(j, i);
+                              life.click(x, y);
                               draw();
                           });
                           element.appendChild(xelement);
@@ -118,7 +118,7 @@
                       } else {
                           x.style.backgroundColor = `rgb(0,${g},0)`;
                       }
-                      if (j == life.getWidth() ) {j=0; i++}
+                      if (j == life.getHeight() ) {j=0; i++}
                   }
               }
 

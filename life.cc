@@ -3,24 +3,25 @@
 #include "life.hh"
 #include <algorithm>
 
-GameOfLife::GameOfLife()  : world(HEIGHT,WIDTH), otherWorld(HEIGHT,WIDTH) {
+GameOfLife::GameOfLife(int _WIDTH, int _HEIGHT) :
+   HEIGHT(_HEIGHT), WIDTH(_WIDTH), world(HEIGHT,WIDTH), otherWorld(HEIGHT,WIDTH) {
    clear();
 }
 
 void GameOfLife::clear() {
-   for ( int i = 0; i < HEIGHT; i++ ) {
-      for ( int j = 0; j < WIDTH; j++ ) {
-         world[i][j] = DEAD;
+   for ( int y = 0; y < HEIGHT; y++ ) {
+      for ( int x = 0; x < WIDTH; x++ ) {
+         world[y][x] = DEAD;
       }
    }
 }
 
-void GameOfLife::click( int j, int i )
+void GameOfLife::click( int x, int y )
 {
-   if ( world[i][j] == LIVE ){
-      world[i][j] = DEAD;
+   if ( world[y][x] == LIVE ){
+      world[y][x] = DEAD;
    } else {
-      world[i][j] = LIVE;
+      world[y][x] = LIVE;
    }
 }
 
@@ -48,21 +49,11 @@ void GameOfLife::print() {
    // std::cout << std::endl;
 }
 
-int GameOfLife::getContent(int i, int j) {
-   return world[i][j];
+int GameOfLife::getContent(int x, int y) {
+   return world[y][x];
 }
 
-void GameOfLife::update() {
-   for ( int i = 0; i < HEIGHT; i++ ) {
-      for ( int j = 0; j < WIDTH; j++ ) {
-         otherWorld[i][j] =
-            GameOfLife::getState(world[i][j] , i , j);
-      }
-   }
-   std::swap(world, otherWorld);
-}
-
-int GameOfLife::getState( int state, int y, int x ) {
+int GameOfLife::getState( int state, int x, int y ) {
     int neighbors = 0;
     for ( int i = y - 1; i <= y + 1; i++ ) {
        for ( int j = x - 1; j <= x + 1; j++ ) {
@@ -85,20 +76,25 @@ int GameOfLife::getState( int state, int y, int x ) {
 }
 
 void GameOfLife::iterate( unsigned int iterations ) {
-    for ( int i = 0; i < iterations; i++ ) {
-        update();
-    }
+   for ( int i = 0; i < iterations; i++ ) {
+      for ( int y = 0; y < HEIGHT; y++ ) {
+         for ( int x = 0; x < WIDTH; x++ ) {
+            otherWorld[y][x] =
+               GameOfLife::getState(world[y][x] , x , y);
+         }
+      }
+      std::swap(world, otherWorld);
+   }
 }
 
 
 // Binding code
 EMSCRIPTEN_BINDINGS(my_class_example) {
    emscripten::class_<GameOfLife>("GameOfLife")
-      .constructor<>()
+      .constructor<int,int>()
       .function("click", &GameOfLife::click)
       .function("clear", &GameOfLife::clear)
       .function("iterate", &GameOfLife::iterate)
-      .function("update", &GameOfLife::update)
       .function("getContent", &GameOfLife::getContent)
       .function("getState", &GameOfLife::getState)
       .function("getHeight", &GameOfLife::getHeight)
