@@ -215,6 +215,34 @@
         canvas.addEventListener("mouseout", mouseUp, false);
         canvas.addEventListener("mousemove", mouseMove, false);
 
+        var touchStart = function(e) {
+            drag = true;
+            touch = e.changedTouches[0];
+            old_x = touch.pageX, old_y = touch.pageY;
+            e.preventDefault();
+            return false;
+        };
+
+        var touchEnd = function(e){
+            drag = false;
+        };
+
+        var touchMove = function(e) {
+            if (!drag) return false;
+            touch = e.changedTouches[0];
+            dX = (touch.pageX-old_x)*2*Math.PI/canvas.width,
+            dY = (touch.pageY-old_y)*2*Math.PI/canvas.height;
+            THETA+= dX;
+            PHI+=dY;
+            old_x = touch.pageX, old_y = touch.pageY;
+            e.preventDefault();
+        };
+
+        canvas.addEventListener("touchstart", touchStart, false);
+        canvas.addEventListener("touchend", touchEnd, false);
+        canvas.addEventListener("touchcancel", touchEnd, false);
+        canvas.addEventListener("touchmove", touchMove, false);
+
         function rotateZ(m, angle) {
             var c = Math.cos(angle);
             var s = Math.sin(angle);
