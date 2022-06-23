@@ -369,11 +369,6 @@
             m[10] = c*m[10]-s*mv8;
         }
 
-        var Pmatrix = gl.getUniformLocation(shaderProgram, "Pmatrix");
-        var Vmatrix = gl.getUniformLocation(shaderProgram, "Vmatrix");
-        var Mmatrix = gl.getUniformLocation(shaderProgram, "Mmatrix");
-        var uSampler = gl.getUniformLocation(shaderProgram, "uSamples");
-
         /* Step5: Drawing the required object (triangle) */
 
         var THETA = 0;
