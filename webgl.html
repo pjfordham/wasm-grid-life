@@ -4,6 +4,16 @@
       <canvas width = "1000" height = "1000" id = "canvas"></canvas>
 
       <script>
+        function get_projection(angle, a, zMin, zMax) {
+            var ang = Math.tan((angle*.5)*Math.PI/180);//angle*.5
+            return [
+                0.5/ang, 0 , 0, 0,
+                0, 0.5*a/ang, 0, 0,
+                0, 0, -(zMax+zMin)/(zMax-zMin), -1,
+                0, 0, (-2*zMax*zMin)/(zMax-zMin), 0
+            ];
+        }
+
         //
         // Initialize a texture and load an image.
         // When the image finished loading copy it into the texture.
@@ -102,6 +112,14 @@
             gl.useProgram(shaderProgram);
 
             return shaderProgram;
+        }
+
+        function bindAttribArray( shader, buffer, name, v, w, x, y, z) {
+            gl.bindBuffer( gl.ARRAY_BUFFER, buffer);
+            var array = gl.getAttribLocation(shader, name);
+            gl.vertexAttribPointer(array, v, w, x, y,z) ;
+            gl.enableVertexAttribArray(array);
+            return array;
         }
 
         /* Step1: Prepare the canvas and get WebGL context */
@@ -229,35 +247,16 @@
         var uSampler = gl.getUniformLocation(shaderProgram, "uSamples");
 
         // Position
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-        var position = gl.getAttribLocation(shaderProgram, "position");
-        gl.vertexAttribPointer(position, 3, gl.FLOAT, false,0,0) ;
-        gl.enableVertexAttribArray(position);
+        var position = bindAttribArray(shaderProgram, vertex_buffer, "position", 3, gl.FLOAT, false, 0, 0);
 
         // Color
-        //gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
-        //var color = gl.getAttribLocation(shaderProgram, "color");
-        //gl.vertexAttribPointer(color, 3, gl.FLOAT, false,0,0) ;
-        //gl.enableVertexAttribArray(color);
+        // var color = bindAttribArray(shaderProgram, color_buffer, "color", 3, gl.FLOAT, false, 0, 0);
 
         // Texture
-        gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-        var textures = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-        gl.vertexAttribPointer(textures, 2, gl.FLOAT, false,0,0) ;
-        gl.enableVertexAttribArray(textures);
+        var textures = bindAttribArray(shaderProgram, textureCoordBuffer, "aTextureCoord", 2, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer)
 
-
-        function get_projection(angle, a, zMin, zMax) {
-            var ang = Math.tan((angle*.5)*Math.PI/180);//angle*.5
-            return [
-                0.5/ang, 0 , 0, 0,
-                0, 0.5*a/ang, 0, 0,
-                0, 0, -(zMax+zMin)/(zMax-zMin), -1,
-                0, 0, (-2*zMax*zMin)/(zMax-zMin), 0
-            ];
-        }
 
         var proj_matrix = get_projection(40, canvas.width/canvas.height, 1, 100);
 
